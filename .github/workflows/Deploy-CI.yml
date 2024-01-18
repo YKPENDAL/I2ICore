@@ -9,18 +9,14 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-
-    - name: ssh
-      image: appleboy/drone-ssh
-      settings:
-       host: 
-         from_secret: SERVER_HOST
-       username: 
-         from_secret: SERVER_USERNAME
-       key: 
-         from_secret: SSH_PRIVATE_KEY
-       port: 
-         from_secret: ssh_port
-       script:
-         - echo "hello"
-         - echo "deploy"
+    - name: Deploy to Server
+      uses: appleboy/ssh-action@master
+      with:
+        aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws_secret_access_key: ${{ secrets.AWS_SECRET_KEY_ID }}
+        region: ${{ secrets.AWS_DEFAULT_REGION }}
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          # Commands to deploy your application (e.g., copy files, restart services, etc.)
