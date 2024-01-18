@@ -13,6 +13,9 @@ jobs:
     - name: Deploy to Server
       uses: appleboy/ssh-action@master
       with:
+        aws_access_key_id : ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws_secret_access_key : ${{ secrets.AWS_SECRET_KEY_ID }}
+        region : ${AWS_DEFAULT_REGION}
         host: ${{ secrets.SERVER_HOST }}
         username: ${{ secrets.SERVER_USERNAME }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
