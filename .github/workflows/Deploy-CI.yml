@@ -1,5 +1,4 @@
-name: Setup MySQL 8 and Java JDK
-
+name: Server Deploy
 on: [push, pull_request]
 
 jobs:
@@ -10,37 +9,18 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Deploy to Server
-      uses: appleboy/ssh-action@master
-      with:
-        aws_access_key_id : ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws_secret_access_key : ${{ secrets.AWS_SECRET_KEY_ID }}
-        region : ${AWS_DEFAULT_REGION}
-        host: ${{ secrets.SERVER_HOST }}
-        username: ${{ secrets.SERVER_USERNAME }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        script: |
-          # Commands to deploy your application (e.g., copy files, restart services, etc.)
 
-
-    - name: Set up MySQL 8
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y mysql-server
-        sudo mysql_secure_installation
-        # Follow the prompts to secure MySQL installation
-
-    - name: Set up Java JDK
-      uses: actions/setup-java@v2
-      with:
-        distribution: 'adopt'
-        java-version: '11'
-
-    - name: Build and test
-      run: |
-        # Your build and test commands go here
-
-    env:
-      DB_HOST: "34.201.220.59"
-      DB_USER: "Test"
-      DB_PASSWORD: "Test@!234"
+    - name: ssh
+      image: appleboy/drone-ssh
+      settings:
+       host: 
+         from_secret: SERVER_HOST
+       username: 
+         from_secret: SERVER_USERNAME
+       key: 
+         from_secret: SSH_PRIVATE_KEY
+       port: 
+         from_secret: ssh_port
+       script:
+         - echo "hello"
+         - echo "deploy"
