@@ -1,22 +1,29 @@
-name: Server Deploy
-on: [push, pull_request]
+name: Deploy Apache
+
+on:
+  push:
+    branches:
+      - main
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Deploy to Server
-      uses: appleboy/ssh-action@master
-      with:
-        aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws_secret_access_key: ${{ secrets.AWS_SECRET_KEY_ID }}
-        region: ${{ secrets.AWS_DEFAULT_REGION }}
-        host: ${{ secrets.SERVER_HOST }}
-        username: ${{ secrets.SERVER_USERNAME }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        script: |
-          # Commands to deploy your application (e.g., copy files, restart services, etc.)
+      - name: Decrypt SSH key
+        run: echo ${{ secrets.SSH_KEY }} | base64 -d > ~/.ssh/deploy_key && chmod 600 ~/.ssh/deploy_key
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y apache2
+
+      - name: Copy Apache config
+        run: scp -r -i ~/.ssh/deploy_key apache-config/* ubuntu@204.236.255.55:/etc/apache2/sites-available/
+
+      - name: Enable site
+        run: ssh -i ~/.ssh/deploy_key ubuntu@204.236.255.55 sudo a2ensite your-site.conf
+
+      - name: Restart Apache
+        run: ssh -i ~/.ssh/deploy_key ubuntu@204.236.255.55 sudo systemctl restart apache2
