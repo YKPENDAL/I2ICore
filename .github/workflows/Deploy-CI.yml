@@ -23,9 +23,15 @@ jobs:
           REMOTE_USER: ${{ secrets.USERNAME }}
           TARGET: ${{ secrets.TARGET_DIR }}
           
-      - name: Set up MySQL 8
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y mysql-server
-          sudo mysql_secure_installation
+      - name: Executing remote ssh commands using ssh key
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST_DNS }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            sudo apt-get -y update
+            sudo apt-get install -y nginx
+            sudo systemctl start nginx
+            sudo systemctl enable nginx
         # Follow the prompts to secure MySQL installation
