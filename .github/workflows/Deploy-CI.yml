@@ -1,5 +1,6 @@
-name: Deploy Apache
+name: Push-to-EC2
 
+# Trigger deployment only on push to main branch
 on:
   push:
     branches:
@@ -7,23 +8,31 @@ on:
 
 jobs:
   deploy:
+    name: Deploy to EC2 on master branch push
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout the files
         uses: actions/checkout@v2
 
-      - name: Decrypt SSH key
-        run: echo ${{ secrets.SSH_KEY }} | base64 -d > ~/.ssh/deploy_key && chmod 600 ~/.ssh/deploy_key
+      - name: Deploy to Server 1
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+          REMOTE_HOST: ${{ secrets.HOST_DNS }}
+          REMOTE_USER: ${{ secrets.USERNAME }}
+          TARGET: ${{ secrets.TARGET_DIR }}
 
-      - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y apache2
-
-      - name: Copy Apache config
-        run: scp -r -i ~/.ssh/deploy_key apache-config/* ubuntu@204.236.255.55:/etc/apache2/sites-available/
-
-      - name: Enable site
-        run: ssh -i ~/.ssh/deploy_key ubuntu@204.236.255.55 sudo a2ensite your-site.conf
-
-      - name: Restart Apache
-        run: ssh -i ~/.ssh/deploy_key ubuntu@204.236.255.55 sudo systemctl restart apache2
+      - name: Executing remote ssh commands using ssh key
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST_DNS }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            sudo apt-get -y update
+            sudo apt-get install -y apache2
+            sudo systemctl start apache2
+            sudo systemctl enable apache2
+            cd home
+            sudo mv * /var/www/html
