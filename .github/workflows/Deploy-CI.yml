@@ -34,4 +34,16 @@ jobs:
             sudo apt-get install -y nginx
             sudo systemctl start nginx
             sudo systemctl enable nginx
+
+
+      - name: Install MySQL
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST_DNS }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            sudo apt-get install -y mysql-server
+            sudo systemctl start mysql
+            sudo systemctl enable mysql
         # Follow the prompts to secure MySQL installation
