@@ -22,4 +22,11 @@ jobs:
           REMOTE_HOST: ${{ secrets.HOST_DNS }}
           REMOTE_USER: ${{ secrets.USERNAME }}
           TARGET: ${{ secrets.TARGET_DIR }}
-
+          
+      - name: Set up MySQL 8
+      	run: |
+          sudo apt-get update
+          sudo apt-get install -y mysql-server
+          sudo mysql_secure_installation
+        # Follow the prompts to secure MySQL installation
+ 
